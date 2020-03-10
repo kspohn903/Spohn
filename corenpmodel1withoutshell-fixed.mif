@@ -1,0 +1,60 @@
+# MIF 2.1
+RandomSeed 1
+Specify Oxs_EllipsoidAtlas:atlas [subst {
+		xrange {0 1.3e-08}
+		yrange {0 1.3e-08}
+		zrange {0 1.3e-08}
+}] ;# sphere of maximum total diamater of 130 nm, 
+Specify Oxs_RectangularMesh:mesh [subst {
+	cellsize {1e-10 1e-10 1e-10}
+	atlas :atlas
+}]
+Specify Oxs_UniaxialAnisotropy {
+		Ha 3.7626e4
+		axis {0 0 1}
+} ;# Maximum Uniaxial Anisotropy along the z-axis
+Specify Oxs_UniformExchange {
+		A 100
+} ;# Assuming is Md in A/m
+Specify Oxs_Demag  {}
+Specify Oxs_RungeKuttaEvolve:evolve {}
+Specify Oxs_MultiAtlas:domains {
+   atlas {Oxs_BoxAtlas:domain1 {
+      xrange {0 0.5e-08}
+      yrange {0 1.3e-08}
+      zrange {0 1.3e-08}
+   }}
+   atlas {Oxs_BoxAtlas:domain2 {
+      xrange {0.5e-08 1.0e-8}
+      yrange {0 1.3e-08}
+      zrange {0 1.3e-08}
+   }}
+   atlas {Oxs_BoxAtlas:domain3 {
+      xrange {1.0e-8 1.3e-08}
+      yrange {0 1.3e-08}
+      zrange {0 1.3e-08}
+   }}
+}
+Specify Oxs_TimeDriver {
+		basename core-np-model1-without-shell
+		evolver :evolve
+		stopping_dm_dt 0.1
+                Ms {Oxs_AtlasScalarField {
+                   atlas :atlas
+                   default_value 0.0
+                   values {
+                      atlas 45
+                   }
+                }}
+		mesh :mesh
+		m0 {Oxs_AtlasVectorField {
+		atlas :domains
+		default_value {0. 0. 0.}
+		values {
+		domain1 {1 0 0}
+		domain2 {0 1 0}
+		domain3 {0 0 1}
+		}
+	}
+	}
+}

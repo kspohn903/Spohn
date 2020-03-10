@@ -1,0 +1,175 @@
+
+ if 0 {
+03-10-2020: Postulate Changes for aesthetic purposes; removing pieces or 
+verbose comments that postulate, suppositionally, potential alterations to 
+an OOMMF simulation.
+ 
+ # proc Name: ms
+ #Parameters: Md d r
+#Return Values: Ms_theoretical 
+#Description: Saturated Magnetization proc. Designed for the calculation of Ms. 
+ 
+ proc ms { Md d r } {
+	set Ms_theoretical [expr { $Md* (($r-$dr)/r)^3 }]
+	#puts " The maximum saturated magnetization of sphere's domain is $Ms\n." ;
+	#Statement designed for debugging purposes only.
+	
+	return $Ms_theoretical	
+    }
+
+ proc tau_measured {tau_a a r} {
+	   set k_Boltzmann 1.381e-23
+	   set pi [expr {4*atan(1.0)}]
+	   set T_body 310
+	   set tau0 10e-10
+	   set vm [expr {(4*$pi/3)*($r)^3}]
+	   set thermal_energy [expr {($T_body* $k_Boltzmann)}]
+	   set tauN [expr{($tau0/2)*sqrt($pi*$thermal_energy/($a*($vm)))* exp( ($a*$vm)/($thermal_energy))}]
+	   return $tauN
+    }
+ 
+ #Variables that I think are needed to parse exp./ theoretical conditions:
+ #intended global variables: r_max, r_min particle types; 
+ 
+ #Boundaries (Diameter Boundaries) of NP Core only:
+ #2 major sizes within boundaries: d_total [10,130]e-10 m
+ #bounds for d_core [10,130]e-10 m.
+ 
+ set k_Boltzmann 1.381e-23
+ set T_body 310
+ set vm [expr {(4*$pi/3)*($r)^3}]
+ set thermal_energy [expr {($T_body* $k_Boltzmann)}]
+ set Hk 3.7626e04 
+ set Md 100
+ set thickness 3.2e-09
+ set Ms_max [expr { ms $Md $thickness 130e-10 }]
+ set Ms_min [expr { ms $Md $thickness 10e-10 }]
+ set a_max [expr{($mu0*$Ms_max*$Hk)/2}] 
+ set a_min [expr{($mu0*$Ms_min*$Hk)/2}] 
+ set W_heat_max [expr {(4*$Ms_max*$mu0*$Hk) }] 
+ set W_heat_min [expr {(4*$Ms_min*$mu0*$Hk) }] 
+ set nu  8.9e-4  
+ set tauB [expr {(3*($nu)/$thermal_energy) }] 
+ set tau_parallel [expr { 1/((1/$tauN)+ (1/$tauB)) }] 
+ set dE_Min [expr { (KU*vm) - Hk*Ms_min*sin(phi) +/- $Hk*$Ms_min*cos($phi) }] 
+ set dE_Max [expr { (KU*vm) - Hk*Ms_max*sin(phi) +/- $Hk*$Ms_min*cos($phi) }]
+ set chi0 [expr {($Md/ $Hk)}]  
+ set P ($pi*$fRes)*$chi0_max*pow($Hk,2)*((2*$pi*$fRes*$tau_parallel)/(1+ pow((2*$pi*$fRes),2))) 
+ 
+}
+if 0 { 
+ #Assuming that we are allowing only 
+ #a positive sphere for each NP 
+ #(i.e. core NP sphere, shell sphere, etc.)
+ #and that we are creating/ allowing 
+ #all Cartesian coordinate axes such that m0 = 
+ #[(+/-)x,(+/-)y,(+/-)z] unit vectors
+
+#total time: interval value function passing [...]
+}
+
+if 0 { }
+
+#Assuming Md is 100 A/m, |Hk| = |Ha| = 3.7626e04 
+#A sinusoidal diamagnetic field subject to the +x-axis, assuming H = Hk n-hat perp to Ms = vector[M/Md] n-hat.
+#Under those conditions,[...] 
+
+#Edit 03-10-2020: Modify Ha 3.7626e4 -> 0 to see how interactions with easy axis/ hard axis, 
+# #Edit 03-01-20: Omitting UniformExchange for analysis w/o 
+
+# Assuming Md = 100 A /m != Aij; A = Aij = [1.4e-14, 1.2e-12] A/m = (mi - mj)/delta(i,j)
+#Edit 03-01-20: Omitting UniaxialAnisotropy for analysis w/o
+
+if 0 { }
+
+# Edit 03-01-20: Testing Sim w/o Script Zeeman #1 for behaviors of core 
+# np only of diamagnetic material (NP Core Fe3O4 only)
+# Theoretical Appending below with an if 0 loop denoting potential commenting out. 
+# Note: Did not effect the mechanism of the vector field. If so, then what's going on here? 
+
+#Edit 03-01-20: Omitting ScriptZeeman, SineField, and/or Demag for analysis w/o.  
+
+
+if 0 { 
+#Edit 03-08-20: Configuring the "what if" scenario: 
+ 
+#Edit Addendum 03-08-20: Does not correspond with mechanism designed.
+# Iterate Ms maunally throughout all such params of Ms, ScriptScalarField 
+# iteratable, but not configuring correctly, despite being syntactically correct   
+    
+	#suppositional statements under "what if? ..." that otherwise enable the creation therein of 
+	#such ScriptScalarField magnitudes of diamagnetic field Hk = Ha 
+
+proc ms { Md 100 d 32e-10 r } {
+	set Ms_theoretical [expr { $Md*(($r- $d)/$r)^3 }]
+	
+	#puts " The maximum saturated magnetization of sphere's domain is $Ms\n." ;
+	#Statement designed for debugging purposes only.
+	
+	return $Ms_theoretical	
+    }
+	
+proc populate {  
+	set radiiList {}
+    for {set i 10} {i < 131} {incr $i} { lappend radiiList expr[$i*1e-10] }
+	set MsList {}
+    foreach r $radiiList { lappend MsList [expr { ms 100 32e-10 r }] }
+    return $MsList	   
+	}
+	
+proc Vortex { xrel yrel zrel } {
+	set xrad [expr {$xrel-0.5}]
+	set yrad [expr {$yrel-0.5}]
+	set normsq [expr {$xrad*$xrad+$yrad*$yrad}]
+	if {$normsq <= 0.025} {return "0 0 1"}
+	return [list [expr {-1*$yrad}] $xrad 0]
+    }
+
+	#replacing time driver [...], because of invested curiosity.
+	
+	Specify Oxs_TimeDriver {
+			 basename np_core_only_Fe3O4_example_theoretical_params
+			 evolver :evolve
+			 stopping_dm_dt 0.1
+				Ms {Oxs_ScriptScalarField {
+					script { ms Md d r }
+					script_args { populate }
+					scalar_fields {MsList}
+					atlas :core
+					
+				} }
+			    mesh :mesh
+				m0 {Oxs_ScriptVectorField {
+					script Vortex
+					norm 1
+					atlas :core	
+			} }
+	}  
+}
+if 0 {
+
+proc Octs { cellsize x y z xmin ymin zmin xmax ymax zmax } {
+    set xindex [expr {int(floor(($x-$xmin)/$cellsize))}]
+    set yindex [expr {int(floor(($y-$ymin)/$cellsize))}]
+    set zindex [expr {int(floor(($z-$zmin)/$cellsize))}]
+    set octant [expr {1+$xindex+2*$yindex+4*$zindex}]
+    if {$octant<1 || $octant>8} {
+       return 0
+    }
+    return $octant
+}
+
+Specify Oxs_ScriptAtlas:octants {
+    xrange {-130e-10 130e-10}
+    yrange {-130e-10 130e-10}
+    zrange {-130e-10 130e-10}
+    regions { VIII V VII VI IV I III II }
+    script_args { rawpt minpt maxpt }
+    script { Octs 130e-10 }
+} 
+
+}
+
+
+
+
